@@ -121,6 +121,21 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         }
     }
+    @Operation(summary = "Deleta um usuário por ID", description = "Deleta um usuário com o ID fornecido")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário deletado com sucesso",content = @Content(mediaType = "application/json",schema = @Schema(implementation = StatusGuia.class))),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado",content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor",content = @Content)
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletarUsuario(@Parameter(description = "ID do usuário a ser deletado") @PathVariable Long id) {
+        try {
+            usuarioService.deletarUsuario(id);
+            return ResponseEntity.ok("Usuário deletado com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+        }
+    }
 
 
 }
