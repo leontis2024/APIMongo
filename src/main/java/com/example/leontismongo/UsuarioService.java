@@ -109,4 +109,17 @@ public class UsuarioService {
 
         return mongoTemplate.save(usuario);
     }
+    public void deletarUsuario(Long id) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(id));
+
+        Usuario usuario = mongoTemplate.findOne(query, Usuario.class);
+
+        if (usuario == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado");
+        }
+
+        mongoTemplate.remove(query, Usuario.class);
+    }
+
 }
