@@ -14,6 +14,7 @@ A *API REST* desenvolvida com *Spring Boot* permite a comunicação entre a inte
    - Operações para criação de avaliações.
    - Operações para criação de histórico de obras escaneadas.
    - Operações para criação de status do guia.
+   - Apagar usuário.
 
 ## Tecnologias Utilizadas
 - *Spring Boot*: Framework principal para o desenvolvimento da API.
@@ -21,10 +22,10 @@ A *API REST* desenvolvida com *Spring Boot* permite a comunicação entre a inte
 - *Swagger*: Ferramenta para documentação interativa da API.
 
 ### Passos do projeto:
- - [] Criação da API para gerenciamento de usuários
+ - [X] Criação da API para gerenciamento de usuários
 
 ### Links 
-http://localhost:8080/swagger-ui/index.html
+https://apimongo-r613.onrender.com/swagger-ui/index.html
 
 ### Principais endpoints
 - */api/usuarios*: Gerenciamento de usuários.
