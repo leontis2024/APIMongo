@@ -1,8 +1,9 @@
-package com.example.leontismongo;
+package com.example.leontismongo.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@ToString
 @Document(collection = "usuarios")
 public class Usuario {
 
