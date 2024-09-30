@@ -1,4 +1,6 @@
-package com.example.leontismongo;
+package com.example.leontismongo.controller;
+import com.example.leontismongo.service.UsuarioService;
+import com.example.leontismongo.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -9,11 +11,10 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -135,6 +136,77 @@ public class UsuarioController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         }
+    }
+    @Operation(summary = "Busca usuários que comentaram em uma obra", description = "Retorna uma lista de usuários que comentaram em uma obra específica pelo ID da obra")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Comentários de usuários retornados com sucesso", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Nenhum comentário encontrado para a obra", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
+    })
+    @GetMapping("/usuarios/comentarios/{obraId}")
+    public ResponseEntity<?> getUsuariosByComentarioObraId(@Parameter(description = "ID da obra", example = "12345")@PathVariable Long obraId) {
+        List<ComentarioUsuario> comentarios = usuarioService.obterComentariosPorObraId(obraId);
+        if (comentarios.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhum comentário encontrado para a obra.");
+        }
+        return ResponseEntity.ok(comentarios);
+    }
+    @Operation(summary = "Obter média de notas de uma obra", description = "Retorna a média de notas de uma obra pelo ID da obra")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Média de notas calculada com sucesso", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Nenhuma avaliação encontrada para a obra", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
+    })
+    @GetMapping("/media-nota/{obraId}")
+    public ResponseEntity<?> obterMediaNota(@Parameter(description = "ID da obra", example = "12345")@PathVariable Long obraId) {
+        Double mediaNota = usuarioService.calcularMediaNotaPorObraId(obraId);
+        if (mediaNota == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhuma avaliação encontrada para a obra.");
+        }
+        return ResponseEntity.ok(mediaNota);
+    }
+    @Operation(summary = "Obter status de guia de um usuário", description = "Retorna o status de um guia para um usuário pelo ID do usuário e ID do guia")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Status de guia retornado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StatusGuiaMostrar.class))),
+            @ApiResponse(responseCode = "404", description = "Status de guia não encontrado", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
+    })
+    @GetMapping("/{usuarioId}/status-guia/{guiaId}")
+    public ResponseEntity<?> obterStatusGuia(@Parameter(description = "ID do usuário", example = "12345")@PathVariable Long usuarioId,@Parameter(description = "ID do guia", example = "12345") @PathVariable Long guiaId) {
+        Optional<StatusGuiaMostrar> statusGuia = usuarioService.obterStatusGuia(usuarioId, guiaId);
+        if (statusGuia.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Status do guia não encontrado para este usuário.");
+        }
+        return ResponseEntity.ok(statusGuia.get());
+    }
+    @Operation(summary = "Obter histórico de uma obra de um usuário", description = "Retorna o histórico de escaneamento de uma obra para um usuário pelo ID do usuário e ID da obra")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Histórico de obra retornado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = HistoricoObras.class))),
+            @ApiResponse(responseCode = "404", description = "Histórico de obra não encontrado", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
+    })
+    @GetMapping("/{usuarioId}/historico/{obraId}")
+    public ResponseEntity<?> getHistoricoObra(@Parameter(description = "ID do usuário", example = "12345")@PathVariable Long usuarioId,@Parameter(description = "ID da obra", example = "12345") @PathVariable Long obraId) {
+        Optional<HistoricoObras> historicoObra = usuarioService.obterHistoricoObra(usuarioId, obraId);
+        if (historicoObra.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Histórico da obra não encontrado para este usuário.");
+        }
+        return ResponseEntity.ok(historicoObra.get());
+    }
+
+    @Operation(summary = "Obter histórico de obras de um usuário", description = "Retorna o histórico completo de obras escaneadas por um usuário pelo ID do usuário")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Histórico de obras retornado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = HistoricoObras.class))),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
+    })
+    @GetMapping("/{id}/historicoObras")
+    public ResponseEntity<?> getHistoricoObras( @Parameter(description = "ID do usuário", example = "12345")@PathVariable Long id) {
+        Optional<List<HistoricoObras>> historicoObras = usuarioService.buscarHistoricoObrasPorId(id);
+        if (historicoObras.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado ou sem histórico de obras.");
+        }
+        return ResponseEntity.ok(historicoObras.get());
     }
 
 
