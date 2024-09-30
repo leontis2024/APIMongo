@@ -1,18 +1,18 @@
-package com.example.leontismongo;
+package com.example.leontismongo.service;
 
-import com.example.leontismongo.Usuario;
-import com.example.leontismongo.Avaliacao;
-import com.example.leontismongo.Comentario;
-import com.example.leontismongo.HistoricoObras;
-import com.example.leontismongo.StatusGuia;
+import com.example.leontismongo.model.*;
+import com.example.leontismongo.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +21,9 @@ public class UsuarioService {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
 
     public Usuario criarUsuario(Usuario usuario) {
         mongoTemplate.save(usuario);
@@ -120,6 +123,62 @@ public class UsuarioService {
         }
 
         mongoTemplate.remove(query, Usuario.class);
+    }
+
+
+    public List<ComentarioUsuario> obterComentariosPorObraId(Long obraId) {
+
+        List<Usuario> usuarios = usuarioRepository.findComentarioByObraId(obraId);
+        List<ComentarioUsuario> comentariosFiltrados = new ArrayList<>();
+
+
+        for (Usuario usuario : usuarios) {
+            for (Comentario comentario : usuario.getComentarios()) {
+
+                if (comentario.getObraId().equals(obraId)) {
+
+                    comentariosFiltrados.add(new ComentarioUsuario(usuario.getId(), comentario));
+                }
+            }
+        }
+
+        return comentariosFiltrados;
+    }
+
+    public Double calcularMediaNotaPorObraId(Long obraId) {
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("avaliacoes.obraId").is(obraId)),
+                Aggregation.unwind("avaliacoes"),
+                Aggregation.group().avg("avaliacoes.nota").as("mediaNota")
+        );
+
+        AggregationResults<MediaNota> results = mongoTemplate.aggregate(aggregation, "usuarios", MediaNota.class);
+        return results.getMappedResults().isEmpty() ? null : results.getMappedResults().get(0).getMediaNota();
+    }
+
+    public Optional<StatusGuiaMostrar> obterStatusGuia(Long usuarioId, Long guiaId) {
+        return usuarioRepository.findStatusGuiaByUsuarioIdAndGuiaId(usuarioId, guiaId);
+    }
+    public Optional<HistoricoObras> obterHistoricoObra(Long usuarioId, Long obraId) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findHistoricoObraByUsuarioIdAndObraId(usuarioId, obraId);
+
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+
+
+            for (HistoricoObras historico : usuario.getHistoricoObras()) {
+                if (historico.getObraId().equals(obraId)) {
+                    return Optional.of(historico);
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<List<HistoricoObras>> buscarHistoricoObrasPorId(Long id) {
+        Optional<Usuario> usuario = usuarioRepository.findById(id);
+        return usuario.map(Usuario::getHistoricoObras);
     }
 
 }
