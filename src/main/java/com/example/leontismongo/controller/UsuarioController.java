@@ -143,8 +143,8 @@ public class UsuarioController {
             @ApiResponse(responseCode = "404", description = "Nenhum comentário encontrado para a obra", content = @Content),
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
     })
-    @GetMapping("/usuarios/comentarios/{obraId}")
-    public ResponseEntity<?> getUsuariosByComentarioObraId(@Parameter(description = "ID da obra", example = "12345")@PathVariable Long obraId) {
+    @GetMapping("/comentarios/{obraId}")
+    public ResponseEntity<?> obtrUsuariosByComentarioObraId(@Parameter(description = "ID da obra", example = "12345")@PathVariable Long obraId) {
         List<ComentarioUsuario> comentarios = usuarioService.obterComentariosPorObraId(obraId);
         if (comentarios.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhum comentário encontrado para a obra.");
@@ -186,7 +186,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
     })
     @GetMapping("/{usuarioId}/historico/{obraId}")
-    public ResponseEntity<?> getHistoricoObra(@Parameter(description = "ID do usuário", example = "12345")@PathVariable Long usuarioId,@Parameter(description = "ID da obra", example = "12345") @PathVariable Long obraId) {
+    public ResponseEntity<?> obterHistoricoObra(@Parameter(description = "ID do usuário", example = "12345")@PathVariable Long usuarioId,@Parameter(description = "ID da obra", example = "12345") @PathVariable Long obraId) {
         Optional<HistoricoObras> historicoObra = usuarioService.obterHistoricoObra(usuarioId, obraId);
         if (historicoObra.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Histórico da obra não encontrado para este usuário.");
@@ -201,7 +201,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
     })
     @GetMapping("/{id}/historicoObras")
-    public ResponseEntity<?> getHistoricoObras( @Parameter(description = "ID do usuário", example = "12345")@PathVariable Long id) {
+    public ResponseEntity<?> obterHistoricoObras( @Parameter(description = "ID do usuário", example = "12345")@PathVariable Long id) {
         Optional<List<HistoricoObras>> historicoObras = usuarioService.buscarHistoricoObrasPorId(id);
         if (historicoObras.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado ou sem histórico de obras.");
