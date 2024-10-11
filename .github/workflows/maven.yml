@@ -35,3 +35,13 @@ jobs:
         with:
           service-id: ${{secrets.serviceid}}
           api-key: ${{secrets.apikey}}
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Deploy to EC2
+        run: |
+             echo "${{secrets.key_G}}" >private_key && chmod 600 private_key
+             ssh  -o StrictHostKeyChecking=no -i "private_key" ubuntu@ec2-52-70-124-34.compute-1.amazonaws.com "
+             cd /home/ubuntu/APIMongo &&
+               git pull origin main &&
+               mvn clean package -DskipTests &&
+               ./executar.sh"
