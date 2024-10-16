@@ -2,6 +2,7 @@ package com.example.leontismongo.service;
 
 import com.example.leontismongo.model.*;
 import com.example.leontismongo.repository.UsuarioRepository;
+import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -181,4 +182,32 @@ public class UsuarioService {
         return usuario.map(Usuario::getHistoricoObras);
     }
 
+    public double contarAvaliacoesPorObraIdENotaComPorcentagem(Long obraId, double notaMinima, double notaMaxima) {
+        Aggregation totalAvaliacoesAgg = Aggregation.newAggregation(
+                Aggregation.unwind("avaliacoes"),
+                Aggregation.match(Criteria.where("avaliacoes.obraId").is(obraId)),
+                Aggregation.group().count().as("totalAvaliacoes")
+        );
+
+        AggregationResults<DBObject> totalResults = mongoTemplate.aggregate(totalAvaliacoesAgg, "usuarios", DBObject.class);
+        long totalAvaliacoes = totalResults.getMappedResults().isEmpty() ? 0 : ((Number) totalResults.getMappedResults().get(0).get("totalAvaliacoes")).longValue();
+
+        if (totalAvaliacoes == 0) {
+            return 0.0;
+        }
+
+        Aggregation faixaAvaliacoesAgg = Aggregation.newAggregation(
+                Aggregation.unwind("avaliacoes"),
+                Aggregation.match(Criteria.where("avaliacoes.obraId").is(obraId)
+                        .and("avaliacoes.nota").gte(notaMinima).lt(notaMaxima)),
+                Aggregation.group().count().as("quantidadeAvaliacoes")
+        );
+
+        AggregationResults<DBObject> faixaResults = mongoTemplate.aggregate(faixaAvaliacoesAgg, "usuarios", DBObject.class);
+        long quantidadeAvaliacoesNaFaixa = faixaResults.getMappedResults().isEmpty() ? 0 : ((Number) faixaResults.getMappedResults().get(0).get("quantidadeAvaliacoes")).longValue();
+
+        return (quantidadeAvaliacoesNaFaixa * 100.0) / totalAvaliacoes;
+    }
+
 }
+
