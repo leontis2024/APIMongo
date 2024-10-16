@@ -209,5 +209,35 @@ public class UsuarioController {
         return ResponseEntity.ok(historicoObras.get());
     }
 
-
+    @Operation(summary = "Conta a porcentagem de avaliações em uma obra com base na faixa de notas",
+            description = "Calcula a porcentagem de avaliações que estão dentro de uma faixa de notas para uma obra específica")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Porcentagem de avaliações retornada com sucesso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "number", format = "double"))),
+            @ApiResponse(responseCode = "404", description = "Obra não encontrada ou não possui avaliações",
+                    content = @Content),
+            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos fornecidos",
+                    content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor",
+                    content = @Content)
+    })
+    @GetMapping("/porcentagem")
+    public ResponseEntity<Double> contarAvaliacoesPorObraIdENotaComPorcentagem(
+            @Parameter(description = "ID da obra para a qual as avaliações serão contadas",
+                    example = "123") @RequestParam Long obraId,
+            @Parameter(description = "Nota mínima para considerar a avaliação",
+                    example = "4.0") @RequestParam double notaMinima,
+            @Parameter(description = "Nota máxima para considerar a avaliação",
+                    example = "5.0") @RequestParam double notaMaxima) {
+        try {
+            double porcentagem = usuarioService.contarAvaliacoesPorObraIdENotaComPorcentagem(obraId, notaMinima, notaMaxima);
+            return ResponseEntity.ok(porcentagem);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }
