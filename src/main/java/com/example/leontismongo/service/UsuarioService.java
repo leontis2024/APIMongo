@@ -150,6 +150,7 @@ public class UsuarioService {
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("avaliacoes.obraId").is(obraId)),
                 Aggregation.unwind("avaliacoes"),
+                Aggregation.match(Criteria.where("avaliacoes.obraId").is(obraId)),
                 Aggregation.group().avg("avaliacoes.nota").as("mediaNota")
         );
 
