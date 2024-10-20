@@ -159,7 +159,20 @@ public class UsuarioService {
     }
 
     public Optional<StatusGuiaMostrar> obterStatusGuia(Long usuarioId, Long guiaId) {
-        return usuarioRepository.findStatusGuiaByUsuarioIdAndGuiaId(usuarioId, guiaId);
+        Optional<Usuario> usuario = usuarioRepository.findUsuarioWithStatusGuia(usuarioId, guiaId);
+        if (usuario.isPresent()) {
+            Usuario usuario1 = usuario.get();
+            return usuario1.getStatusGuia().stream()
+                    .filter(status -> status.getGuiaId().equals(guiaId))
+                    .map(status -> {
+                        StatusGuiaMostrar statusMostrar = new StatusGuiaMostrar();
+                        statusMostrar.setConcluido(status.isConcluido());
+                        statusMostrar.setNumeroPassoAtual(status.getNumeroPassoAtual());
+                        return statusMostrar;
+                    })
+                    .findFirst();
+        }
+        return Optional.empty();
     }
     public Optional<HistoricoObras> obterHistoricoObra(Long usuarioId, Long obraId) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findHistoricoObraByUsuarioIdAndObraId(usuarioId, obraId);
