@@ -223,5 +223,37 @@ public class UsuarioService {
         return (quantidadeAvaliacoesNaFaixa * 100.0) / totalAvaliacoes;
     }
 
+    public List<Comentario> buscarComentariosPorUsuarioId(Long usuarioId) {
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(usuarioId));
+
+        query.fields().include("comentarios").exclude("_id");
+
+        Usuario usuario = mongoTemplate.findOne(query, Usuario.class);
+
+        if (usuario == null || usuario.getComentarios() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário ou comentários não encontrados");
+        }
+
+        return usuario.getComentarios();
+    }
+    public List<Avaliacao> buscarAvaliacoesPorUsuarioId(Long usuarioId) {
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(usuarioId));
+
+        query.fields().include("avaliacoes").exclude("_id");
+
+        Usuario usuario = mongoTemplate.findOne(query, Usuario.class);
+
+        if (usuario == null || usuario.getAvaliacoes() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário ou avaliações não encontrados");
+        }
+
+        return usuario.getAvaliacoes();
+    }
+
+
 }
 
