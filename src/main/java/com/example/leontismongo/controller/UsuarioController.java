@@ -240,4 +240,40 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    @Operation(summary = "Buscar comentários de um usuário",
+            description = "Retorna uma lista de comentários feitos por um usuário específico com base no ID do usuário")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Comentários retornados com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comentario.class))),
+            @ApiResponse(responseCode = "404", description = "Nenhum comentário encontrado para o usuário", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
+    })
+    @GetMapping("/{userId}/comentarios")
+    public ResponseEntity<?> buscarComentariosPorUsuarioId(
+            @Parameter(description = "ID do usuário para buscar os comentários") @PathVariable Long userId) {
+        List<Comentario> comentarios = usuarioService.buscarComentariosPorUsuarioId(userId);
+        if (comentarios.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhum comentário encontrado para o usuário.");
+        }
+        return ResponseEntity.ok(comentarios);
+    }
+
+    // Buscar Notas (Avaliações) por ID do Usuário
+    @Operation(summary = "Buscar avaliações de um usuário",
+            description = "Retorna uma lista de avaliações (notas) feitas por um usuário específico com base no ID do usuário")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Avaliações retornadas com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Avaliacao.class))),
+            @ApiResponse(responseCode = "404", description = "Nenhuma avaliação encontrada para o usuário", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
+    })
+    @GetMapping("/{userId}/avaliacoes")
+    public ResponseEntity<?> buscarAvaliacoesPorUsuarioId(
+            @Parameter(description = "ID do usuário para buscar as avaliações") @PathVariable Long userId) {
+        List<Avaliacao> avaliacoes = usuarioService.buscarAvaliacoesPorUsuarioId(userId);
+        if (avaliacoes.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhuma avaliação encontrada para o usuário.");
+        }
+        return ResponseEntity.ok(avaliacoes);
+    }
 }
