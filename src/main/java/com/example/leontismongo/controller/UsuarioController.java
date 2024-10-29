@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
@@ -275,5 +276,24 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhuma avaliação encontrada para o usuário.");
         }
         return ResponseEntity.ok(avaliacoes);
+    }
+    @Operation(summary = "Atualiza se o usuário é elegível para premium", description = "Atualiza o status de elegibilidade para premium de um usuário")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content)
+    })
+    @PutMapping("/{userId}/premium")
+    public ResponseEntity<?> atualizarPossivelPremium(
+            @Parameter(description = "ID do usuário a ser atualizado") @PathVariable Long userId,
+            @Parameter(description = "Valor de elegibilidade para premium") @Valid @RequestParam Boolean possivelPremium) {
+        try {
+            Usuario usuarioAtualizado = usuarioService.atualizarPossivelPremium(userId, possivelPremium);
+            return ResponseEntity.ok(usuarioAtualizado);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno no servidor");
+        }
     }
 }

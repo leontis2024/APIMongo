@@ -30,4 +30,5 @@ public class Usuario {
     private List<Avaliacao> avaliacoes = new ArrayList<>();
     private List<HistoricoObras> historicoObras = new ArrayList<>();
     private List<StatusGuia> statusGuia = new ArrayList<>();
+    private Premium premium;
 }

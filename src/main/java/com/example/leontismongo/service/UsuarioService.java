@@ -255,5 +255,16 @@ public class UsuarioService {
     }
 
 
+
+    public Usuario atualizarPossivelPremium(Long userId, Boolean possivelPremium) {
+        Usuario usuario = buscarUsuarioPorId(userId);
+        if (usuario.getPremium() == null) {
+            usuario.setPremium(new Premium());
+        }
+        usuario.getPremium().setPossivelPremium(possivelPremium);
+        return mongoTemplate.save(usuario);
+    }
+
+
 }
 
